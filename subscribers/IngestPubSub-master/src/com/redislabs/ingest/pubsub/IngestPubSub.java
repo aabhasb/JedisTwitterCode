@@ -32,22 +32,27 @@ public class IngestPubSub
 	Publisher publisher = null;
 	Subscriber englishFilter = null;
 	Subscriber influencerFilter = null;
-	static Subscriber[] hashtagCollector;// = new Subscriber[10];
+	static Subscriber[] dataCollector;// = new Subscriber[10];
 	Subscriber influencerCollector = null;
 	static int messageCount = 0;
-	
+	static int numSubscribers = 1;	
+	static int subscribersPerChannel = 1;
 	/*
 	 * Start the main program; start all the components 
+	 * arg0 - hostsFile
+	 * arg1 - number of subscribers
+	 * arg2 - subscribers per channel
 	 */
 	public static void main(String[] args) throws Exception
 	{
 		
 		try{
 			ConnectionUtils.setHosts(args[0]);
-			int numSubscribers = Integer.parseInt(args[1]);
-			hashtagCollector = new Subscriber[numSubscribers];
+			numSubscribers = Integer.parseInt(args[1]);
+			subscribersPerChannel = Integer.parseInt(args[2]);
+			dataCollector = new Subscriber[numSubscribers];
 			IngestPubSub ing = new IngestPubSub();
-			ing.start(numSubscribers);	
+			ing.start();	
 		}catch(Exception pe){
 			pe.printStackTrace();
 		}
@@ -57,7 +62,7 @@ public class IngestPubSub
 	/*
 	 * Start all the services, register the callback as a listener  
 	 */
-	public void start(int numSubScribers) throws Exception{
+	public void start() throws Exception{
 		PNConfiguration pnConfig = new PNConfiguration();
 		pnConfig.setSubscribeKey(SUB_KEY_TWITTER);
 		pnConfig.setSecure(false);
@@ -65,19 +70,14 @@ public class IngestPubSub
 		PubNub pubnub = new PubNub(pnConfig);
 		
 		pubnub.subscribe().channels(Arrays.asList(CHANNEL_TWITTER)).execute();
-		
-		// All incoming data are published to this channel
-		//publisher = new Publisher("alldata");
-		
-		// EnglishTweetFilter subscribes to AllData and publishes to EnglishTweets 
-		// englishFilter = new EnglishTweetFilter("English Filter","alldata", "englishtweets");
-		
-		// InfluencerTweetFilter subscribes to AllData and publishes to InfluencerTweets
-		//influencerFilter = new InfluencerTweetFilter("Influencer Filter", "alldata", "influencertweets");
-		
-		// HashTagCollector subscribes to EnglishTweets
-		for (int i=0; i<numSubScribers; i++) {
-			hashtagCollector[i] = new HashTagCollector("Hashtag Collector", "alldata");
+				
+		// DataCollector subscribes to Channels
+		int channelNo = 0, subscriberPerChannelsoFar = 0;
+		for (int i=0; i<numSubscribers; i++) {
+			dataCollector[i] = new DataCollector("Data Collector", "Channel"+channelNo);
+			if((subscriberPerChannelsoFar++) == subscribersPerChannel) {
+				channelNo++;
+			}
 		}
 
 		// InfluencerCollector subscribes to InfluencerTweets

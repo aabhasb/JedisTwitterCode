@@ -16,7 +16,7 @@ import redis.clients.jedis.Jedis;
  * HashTagCollector is a custom class that listens to English Tweets,
  * extracts all the hash tags, and indexes them in a Redis Sorted Set 
  */
-public class HashTagCollector extends Subscriber{
+public class DataCollector extends Subscriber{
 	
 	// Regular expression to extract a hashtag
 	Pattern HASHPATTERN = Pattern.compile("#(\\w+)");
@@ -31,7 +31,7 @@ public class HashTagCollector extends Subscriber{
 	 * @param subscriberName: name of this object
 	 * @param channel: name of the channel to listen to
 	 */
-	public HashTagCollector(String subscriberName, String channel) throws Exception{
+	public DataCollector(String subscriberName, String channel) throws Exception{
 		super(subscriberName, channel);
 		
 		conn = RedisConnection.getRedisConnection();
