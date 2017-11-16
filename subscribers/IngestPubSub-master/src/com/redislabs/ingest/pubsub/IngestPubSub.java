@@ -80,9 +80,6 @@ public class IngestPubSub
 			}
 		}
 
-		// InfluencerCollector subscribes to InfluencerTweets
-		//influencerCollector = new InfluencerCollector("Influencer Collector", "influencertweets");
-		
 		// PubNub event callback
 		/*SubscribeCallback subscribeCallback = new SubscribeCallback() {
 		    @Override
