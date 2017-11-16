@@ -120,7 +120,7 @@ public class IngestPubSub
 		};
 		 
 		// Add callback as a listener (PubNub code) 
-		pubnub.addListener(subscribeCallback);*/
+		pubnub.addListener(subscribeCallback);*/ 
 		
 	}
 }
