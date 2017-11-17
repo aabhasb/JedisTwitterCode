@@ -29,11 +29,12 @@ public class IngestPubSub
 	final static String SUB_KEY_TWITTER = "sub-c-78806dd4-42a6-11e4-aed8-02ee2ddab7fe";
 	final static String CHANNEL_TWITTER = "pubnub-twitter";
 	
-	Publisher publisher = null;
+	static Publisher[] publishers;
 	Subscriber englishFilter = null;
 	Subscriber influencerFilter = null;
 	Subscriber[] hashtagCollector = new Subscriber[10];
 	Subscriber influencerCollector = null;
+	static int numPublishers = 1;
 	static int messageCount = 0;
 	
 	/*
@@ -42,6 +43,8 @@ public class IngestPubSub
 	public static void main(String[] args) throws Exception
 	{
 		IngestPubSub ing = new IngestPubSub();
+		numPublishers = Integer.parseInt(args[0]);
+		publishers =  new Publisher[numPublishers];
 		try{
 			ing.start();	
 		}catch(Exception pe){
@@ -54,16 +57,22 @@ public class IngestPubSub
 	 * Start all the services, register the callback as a listener  
 	 */
 	public void start() throws Exception{
-		PNConfiguration pnConfig = new PNConfiguration();
-		pnConfig.setSubscribeKey(SUB_KEY_TWITTER);
-		pnConfig.setSecure(false);
-		
-		PubNub pubnub = new PubNub(pnConfig);
-		
-		pubnub.subscribe().channels(Arrays.asList(CHANNEL_TWITTER)).execute();
+//		PNConfiguration pnConfig = new PNConfiguration();
+//		pnConfig.setSubscribeKey(SUB_KEY_TWITTER);
+//		pnConfig.setSecure(false);
+//		
+//		PubNub pubnub = new PubNub(pnConfig);
+//		
+//		pubnub.subscribe().channels(Arrays.asList(CHANNEL_TWITTER)).execute();
 		
 		// All incoming data are published to this channel
-		publisher = new Publisher("alldata");
+		for (int i=0; i<numPublishers; i++) {
+			//Create one channel per publisher
+			publishers[i] = new Publisher("Channel"+i);
+			//Publish one default message to the channel
+			publishers[i].publish();
+		}
+		
 		
 		// EnglishTweetFilter subscribes to AllData and publishes to EnglishTweets 
 		//englishFilter = new EnglishTweetFilter("English Filter","alldata", "englishtweets");
@@ -80,43 +89,47 @@ public class IngestPubSub
 		//influencerCollector = new InfluencerCollector("Influencer Collector", "influencertweets");
 		
 		// PubNub event callback
-		SubscribeCallback subscribeCallback = new SubscribeCallback() {
-		    @Override
-		    public void status(PubNub pubnub, PNStatus status) {
-		        if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
-		            // internet got lost, do some magic and call reconnect when ready
-		            pubnub.reconnect();
-		        } else if (status.getCategory() == PNStatusCategory.PNTimeoutCategory) {
-		            // do some magic and call reconnect when ready
-		            pubnub.reconnect();
-		        } else {
-		            //System.out.println(status.toString());
-		        }
-		    }
-		 
-		    // Receive the message and publish to AllData channel
-		    @Override
-		    public void message(PubNub pubnub, PNMessageResult message) {
-		    	try{
-		    		//System.out.println(message.getMessage());
-		    		if (messageCount++<1) {
-		    		
-		    			publisher.publish(message.getMessage().toString());	
-		    		}
-		    	}catch(Exception e){
-		    		e.printStackTrace();
-		    	}
-		    	
-		    	
-		    }
-		 
-		    @Override
-		    public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-		    }
-		};
-		 
-		// Add callback as a listener (PubNub code) 
-		pubnub.addListener(subscribeCallback);	
-		
+//		SubscribeCallback subscribeCallback = new SubscribeCallback() {
+//		    @Override
+//		    public void status(PubNub pubnub, PNStatus status) {
+//		        if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
+//		            // internet got lost, do some magic and call reconnect when ready
+//		            pubnub.reconnect();
+//		        } else if (status.getCategory() == PNStatusCategory.PNTimeoutCategory) {
+//		            // do some magic and call reconnect when ready
+//		            pubnub.reconnect();
+//		        } else {
+//		            //System.out.println(status.toString());
+//		        }
+//		    }
+//		 
+//		    // Receive the message and publish to AllData channel
+//		    @Override
+//		    public void message(PubNub pubnub, PNMessageResult message) {
+//		    	try{
+//		    		//System.out.println(message.getMessage());
+////		    		if (messageCount++<1) {
+////		    			publisher.publish(message.getMessage().toString());	
+////		    		}
+//					if (messageCount++ < 1) {
+//						for (int i = 0; i < numPublishers; i++) {
+//							publishers[i].publish(message.getMessage().toString());
+//						}
+//					}
+//		    	}catch(Exception e){
+//		    		e.printStackTrace();
+//		    	}
+//		    	
+//		    	
+//		    }
+//		 
+//		    @Override
+//		    public void presence(PubNub pubnub, PNPresenceEventResult presence) {
+//		    }
+//		};
+//		 
+//		// Add callback as a listener (PubNub code) 
+//		pubnub.addListener(subscribeCallback);	
+//		
 	}
 }

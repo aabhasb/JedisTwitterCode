@@ -40,5 +40,15 @@ public class Publisher {
 		Date date = new Date();
 		jedis.publish(channel, "Message@" + SDF.format(date));
 	}
+	
+	/*
+	 * Default message published
+	 */
+	public void publish() throws Exception {
+		// jedis.publish(channel, msg);
 
+		final SimpleDateFormat SDF = new SimpleDateFormat("HH:mm:ss:S");
+		Date date = new Date();
+		jedis.publish(channel, "Message@" + SDF.format(date));
+	}
 }
