@@ -77,6 +77,7 @@ public class IngestPubSub
 			dataCollector[i] = new DataCollector("Data Collector", "Channel"+channelNo);
 			if((subscriberPerChannelsoFar++) == subscribersPerChannel) {
 				channelNo++;
+				subscriberPerChannelsoFar = 0;
 			}
 		}
 
